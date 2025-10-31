@@ -11,24 +11,6 @@ from flio_reader import get_array
 from pydicom.dataset import Dataset, FileMetaDataset
 from pydicom.uid import ImplicitVRLittleEndian
 
-irf_data = [
-    {"flio_sn": "15352", "short_irf": "60", "long_irf": "55"},
-    {"flio_sn": "15361", "short_irf": "45", "long_irf": "50"},
-    {"flio_sn": "15349", "short_irf": "60", "long_irf": "60"},
-    {"flio_sn": "15362", "short_irf": "70", "long_irf": "75"},
-    {"flio_sn": "15350", "short_irf": "75", "long_irf": "70"},
-    {"flio_sn": "15351", "short_irf": "85", "long_irf": "65"},
-    {"flio_sn": "15355", "short_irf": "65", "long_irf": "50"},
-    {"flio_sn": "15354", "short_irf": "65", "long_irf": "60"},
-    {"flio_sn": "15353", "short_irf": "85", "long_irf": "65"},
-    {"flio_sn": "15356", "short_irf": "90", "long_irf": "70"},
-    {"flio_sn": "15357", "short_irf": "90", "long_irf": "85"},
-    {"flio_sn": "15359", "short_irf": "85", "long_irf": "75"},
-    {"flio_sn": "15360", "short_irf": "65", "long_irf": "65"},
-    {"flio_sn": "15358", "short_irf": "80", "long_irf": "60"},
-]
-
-
 
 def get_all_file_names(folder_path):
     """
@@ -424,18 +406,6 @@ def short_add_html_sdt_info(dataset, sdt, dicom_info, output):
         dicom_info["ShortWavelengthInvalidPhotonsPerFrame"],
     )
 
-###
-    flio_sn_input = str(dicom_info["cam_sn"])
-    record = next((item for item in irf_data if item["flio_sn"] == flio_sn_input), None)
-    short_irf = record["short_irf"]
-    dicom.add_new(
-        pydicom.tag.Tag(0x0073, 0x100D),
-        "LO",
-        str(short_irf),
-    )
-
-###
-
     # Adding FLIO SDT information
     r = flio_reader.dump_metadata(sdt)
     base_group_number = 0x0075
@@ -534,18 +504,6 @@ def long_add_html_sdt_info(dataset, sdt, dicom_info, output):
         "LO",
         dicom_info["LongWavelengthInvalidPhotonsPerFrame"],
     )
-
-    ###
-    flio_sn_input = str(dicom_info["cam_sn"])
-    record = next((item for item in irf_data if item["flio_sn"] == flio_sn_input), None)
-    long_irf = record["long_irf"]
-    dicom.add_new(
-        pydicom.tag.Tag(0x0073, 0x100D),
-        "LO",
-        str(long_irf),
-    )
-    
-###
 
     # Adding FLIO SDT information
     r = flio_reader.dump_metadata(sdt)
@@ -1157,7 +1115,6 @@ tags_to_extract = [
     "0073100a",
     "0073100b",
     "0073100c",
-    "0073100d",
     "00750010",
     "00751001",
     "00751002",
