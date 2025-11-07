@@ -1,7 +1,8 @@
-import os
-import pydicom
-import imaging_utils
 import json
+import os
+
+import imaging_utils
+import pydicom
 
 
 def meta_data_save(filename, output_folder):
@@ -52,7 +53,7 @@ def meta_data_save(filename, output_folder):
     sop_instance_uid = dataset.SOPInstanceUID
 
     dic = {
-        "participant_id": patient_id,
+        "person_id": patient_id,
         "manufacturer": manufacturer,
         "manufacturers_model_name": device,
         "laterality": laterality,

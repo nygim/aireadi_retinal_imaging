@@ -1,9 +1,8 @@
+import imaging_flio_converter as flio_conv
 import imaging_flio_metadata as flio_meta
 import imaging_flio_organize as flio_organize
 import imaging_utils
 from imaging_standards import DataDomain
-
-import aireadi_retinal_imaging.year_3.imaging_flio_converter as flio_conv
 
 # import imaging.flio_retinal_photography_metadata as flio_meta
 

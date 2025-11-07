@@ -1,8 +1,8 @@
-import os
-import pydicom
-import imaging_utils
 import json
+import os
 
+import imaging_utils
+import pydicom
 
 oct_mapping = {
     "maestro2_3d_wide_oct": [
@@ -167,7 +167,7 @@ def meta_data_save(filename, output_folder):
         rule = dataset.ProtocolName
 
         dic = {
-            "participant_id": patient_id,
+            "person_id": patient_id,
             "filepath": file,
             "manufacturer": manufacturer,
             "manufacturers_model_name": device,

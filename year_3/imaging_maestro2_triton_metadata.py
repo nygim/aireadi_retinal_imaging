@@ -167,7 +167,7 @@ def meta_data_save(filename, output_folder):
         rule = dataset.ProtocolName
 
         dic = {
-            "participant_id": patient_id,
+            "person_id": patient_id,
             "filepath": file,
             "manufacturer": manufacturer,
             "manufacturers_model_name": device,
@@ -241,7 +241,7 @@ def meta_data_save(filename, output_folder):
         reference_instance_uid = dataset[0x52009229][0][0x00081140][0][0x00081155].value
 
         dic = {
-            "participant_id": patient_id,
+            "person_id": patient_id,
             "filepath": file,
             "manufacturer": manufacturer,
             "manufacturers_model_name": device,
@@ -316,7 +316,7 @@ def meta_data_save(filename, output_folder):
         sop_instance_uid = dataset.SOPInstanceUID
 
         dic = {
-            "participant_id": patient_id,
+            "person_id": patient_id,
             "filepath": file,
             "modality": modality,
             "submodality": sub_modality,
@@ -387,7 +387,7 @@ def meta_data_save(filename, output_folder):
         sop_instance_uid = dataset.SOPInstanceUID
 
         dic = {
-            "participant_id": patient_id,
+            "person_id": patient_id,
             "filepath": file,
             "modality": modality,
             "submodality": sub_modality,
@@ -516,7 +516,7 @@ def meta_data_save(filename, output_folder):
                 ].value
 
         dic = {
-            "participant_id": patient_id,
+            "person_id": patient_id,
             "filepath": file,
             "modality": modality,
             "submodality": sub_modality,

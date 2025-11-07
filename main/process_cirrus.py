@@ -9,7 +9,8 @@ from tqdm import tqdm
 
 # This line is specific to your local machine's setup.
 # It tells Python where to find your custom modules.
-sys.path.append("/year_3")
+sys.path.append("/Users/nayoonkim/pipeline_imaging/aireadi_retinal_imaging/year_3")
+
 import cirrus_utils
 import imaging_utils
 # Now that the path is added, you can import your custom modules

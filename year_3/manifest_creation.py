@@ -155,7 +155,7 @@ def process_cirrus_file(file, imaging_folder, metadata_folder):
         # vol
         vol_file = find_matching_json_files(vol_uid, "flow_cube", files)
         vol_file_path = get_item_from_json(vol_file[0], "filepath")
-        vol_file_participant_id = get_item_from_json(vol_file[0], "participant_id")
+        vol_file_participant_id = get_item_from_json(vol_file[0], "person_id")
         vol_file_manufacturer = get_item_from_json(vol_file[0], "manufacturer")
         vol_file_manufacturers_model_name = get_item_from_json(
             vol_file[0], "manufacturers_model_name"
@@ -169,7 +169,7 @@ def process_cirrus_file(file, imaging_folder, metadata_folder):
 
         df.loc[:, "flow_cube_file_path"] = vol_file_path
         df.loc[:, "flow_cube_sop_instance_uid"] = vol_uid
-        df.loc[:, "participant_id"] = vol_file_participant_id
+        df.loc[:, "person_id"] = vol_file_participant_id
         df.loc[:, "manufacturer"] = vol_file_manufacturer.capitalize()
         df.loc[:, "manufacturers_model_name"] = (
             vol_file_manufacturers_model_name.capitalize()
@@ -277,7 +277,7 @@ def process_cirrus_file(file, imaging_folder, metadata_folder):
         ]
 
         columns_to_keep = [
-            "participant_id",
+            "person_id",
             "manufacturer",
             "manufacturers_model_name",
             "anatomic_region",
@@ -386,7 +386,7 @@ def process_topcon_file(seg, imaging_folder, metadata_folder):
         # vol
         vol_file = find_matching_json_files(vol_uid, "flow_cube", files)
         vol_file_path = get_item_from_json(vol_file[0], "filepath")
-        vol_file_participant_id = get_item_from_json(vol_file[0], "participant_id")
+        vol_file_participant_id = get_item_from_json(vol_file[0], "person_id")
         vol_file_manufacturer = get_item_from_json(vol_file[0], "manufacturer")
         vol_file_manufacturers_model_name = get_item_from_json(
             vol_file[0], "manufacturers_model_name"
@@ -400,7 +400,7 @@ def process_topcon_file(seg, imaging_folder, metadata_folder):
 
         df.loc[:, "flow_cube_file_path"] = vol_file_path
         df.loc[:, "flow_cube_sop_instance_uid"] = vol_uid
-        df.loc[:, "participant_id"] = vol_file_participant_id
+        df.loc[:, "person_id"] = vol_file_participant_id
         df.loc[:, "manufacturer"] = vol_file_manufacturer.capitalize()
         df.loc[:, "manufacturers_model_name"] = (
             vol_file_manufacturers_model_name.capitalize()
@@ -549,7 +549,7 @@ def process_topcon_file(seg, imaging_folder, metadata_folder):
         )
 
         columns_to_keep = [
-            "participant_id",
+            "person_id",
             "manufacturer",
             "manufacturers_model_name",
             "anatomic_region",
@@ -670,7 +670,7 @@ def octa_manifest(imaging_folder):
     merged_files = cirrus_filtered_files + topcon_filtered_files
 
     # Define number of sublists
-    num_sublists = 10
+    num_sublists = 5
 
     merged_split_lists = split_list(merged_files, num_sublists)
 
@@ -685,6 +685,19 @@ def octa_manifest(imaging_folder):
     all_files = glob.glob(f"{imaging_folder}/retinal_octa/manifest_*.tsv")
     df_list = [pd.read_csv(file, sep="\t") for file in all_files]
     final_df = pd.concat(df_list, ignore_index=True)
+
+    for file in all_files:
+        os.remove(file)
+
+    col_to_insert_after = "associated_segmentation_file_path"
+
+    # Find the insertion index (position after the given column)
+    insert_idx =  final_df.columns.get_loc(col_to_insert_after) + 1
+
+    # Insert columns with default value "Not reported"
+    final_df.insert(insert_idx, "variant_segmentation_sop_instance_uid", "Not reported")
+    final_df.insert(insert_idx + 1, "variant_segmentation_file_path", "Not reported")
+
     final_df = final_df.drop_duplicates()
 
     # Save the final combined DataFrame as a single TSV file
@@ -750,7 +763,7 @@ def make_retinal_photography_manifest(imaging_folder):
 
             df_filtered = df[
                 [
-                    "participant_id",
+                    "person_id",
                     "manufacturer",
                     "manufacturers_model_name",
                     "laterality",
@@ -768,7 +781,7 @@ def make_retinal_photography_manifest(imaging_folder):
 
     # Concatenate all DataFrames in the list into one large DataFrame
     final_df = pd.concat(data, ignore_index=True)
-    final_df = final_df.sort_values(by=["participant_id", "filepath"])
+    final_df = final_df.sort_values(by=["person_id", "filepath"])
     op = f"{imaging_folder}/retinal_photography/manifest.tsv"
     final_df.to_csv(op, sep="\t", index=False)
 
@@ -798,12 +811,11 @@ def make_retinal_oct_manifest(op, imaging_folder):
             # Convert the flattened data into a DataFrame
             df = pd.DataFrame(flattened_data)
 
-            # Show only specific columns you are interested in: 'participant_id', 'filepath', 'manufacturer'
 
             # Filter specific columns
             df_filtered = df[
                 [
-                    "participant_id",
+                    "person_id",
                     "manufacturer",
                     "manufacturers_model_name",
                     "anatomic_region",
@@ -835,7 +847,7 @@ def make_retinal_oct_manifest(op, imaging_folder):
             data.append(df_filtered)
 
     final_df = pd.concat(data, ignore_index=True)
-    final_df = final_df.sort_values(by=["participant_id", "filepath"])
+    final_df = final_df.sort_values(by=["person_id", "filepath"])
 
     opt = f"{imaging_folder}/retinal_oct/manifest.tsv"
     final_df.to_csv(
@@ -863,11 +875,9 @@ def make_flio_manifest(imaging_folder):
             # Step 2: Convert the flattened data into a DataFrame
             df = pd.DataFrame(flattened_data)
 
-            # Step 3: Show only specific columns you are interested in: 'participant_id', 'filepath', 'manufacturer'
-
             df_filtered = df[
                 [
-                    "participant_id",
+                    "person_id",
                     "manufacturer",
                     "manufacturers_model_name",
                     "laterality",
@@ -885,7 +895,7 @@ def make_flio_manifest(imaging_folder):
 
     # Step 5: Concatenate all DataFrames in the list into one large DataFrame
     final_df = pd.concat(data, ignore_index=True)
-    final_df = final_df.sort_values(by=["participant_id", "filepath"])
+    final_df = final_df.sort_values(by=["person_id", "filepath"])
     flio = f"{imaging_folder}/retinal_flio/manifest.tsv"
     final_df.to_csv(
         flio,

@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("/year_3")
+sys.path.append("/Users/nayoonkim/pipeline_imaging/aireadi_retinal_imaging/year_3")
 import argparse
 import os
 
