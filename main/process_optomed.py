@@ -9,7 +9,11 @@ from tqdm import tqdm
 
 # This line is specific to your local machine's setup.
 # It tells Python where to find your custom modules.
-sys.path.append("C:\\Users\\sanjay\\Developer\\aireadi_retinal_imaging\\year_3")
+# Add year_3 directory to path - OS agnostic
+year_3_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "year_3"
+)
+sys.path.append(year_3_path)
 
 import imaging_utils
 
@@ -54,8 +58,11 @@ def main():
     """
     Main function to parse command-line arguments and run the Optomed processing pipeline.
     """
-    input_folder = "C:\\Users\\sanjay\\Downloads\\sample_data\\optomed\\input"
-    output_folder = "C:\\Users\\sanjay\\Downloads\\sample_data\\optomed\\output"
+    # Example paths - replace with your actual paths or use command-line arguments
+    home_folder = os.path.expanduser("~")
+    download_data_folder = os.path.join(home_folder, "Downloads", "sample_data")
+    input_folder = os.path.join(download_data_folder, "optomed", "input")
+    output_folder = os.path.join(download_data_folder, "optomed", "output")
 
     ## delete the output_folder if it exists
     if os.path.exists(output_folder):

@@ -9,9 +9,14 @@ from tqdm import tqdm
 
 # This line is specific to your local machine's setup.
 # It tells Python where to find your custom modules.
-sys.path.append("/Users/nayoonkim/pipeline_imaging/aireadi_retinal_imaging/year_3")
+# Add year_3 directory to path - OS agnostic
+year_3_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "year_3"
+)
+sys.path.append(year_3_path)
 
 import imaging_utils
+
 # Now that the path is added, you can import your custom modules
 import pydicom
 from imaging_flio_root import Flio
@@ -32,19 +37,22 @@ def write_log(log_file_path, input_path, status, error_message=""):
     file_exists = os.path.exists(log_file_path)
 
     # 'a' mode is for appending, newline='' prevents extra blank rows
-    with open(log_file_path, 'a', newline='') as csvfile:
-        fieldnames = ['Timestamp', 'Input', 'Status', 'ErrorMessage']
+    with open(log_file_path, "a", newline="") as csvfile:
+        fieldnames = ["Timestamp", "Input", "Status", "ErrorMessage"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         if not file_exists:
             writer.writeheader()  # Write the header row
 
-        writer.writerow({
-            'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'Input': input_path,
-            'Status': status,
-            'ErrorMessage': error_message
-        })
+        writer.writerow(
+            {
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Input": input_path,
+                "Status": status,
+                "ErrorMessage": error_message,
+            }
+        )
+
 
 def main():
     """
@@ -57,27 +65,30 @@ def main():
     )
 
     parser.add_argument(
-        "-i", "--input-folder",
+        "-i",
+        "--input-folder",
         dest="input_folder",
         required=True,
         help="Path to the root input folder containing the initial data.",
-        metavar="PATH"
+        metavar="PATH",
     )
 
     parser.add_argument(
-        "-o", "--output-folder",
+        "-o",
+        "--output-folder",
         dest="output_folder",
         required=True,
         help="Path to the root folder where all processed steps and outputs will be saved.",
-        metavar="PATH"
+        metavar="PATH",
     )
 
     parser.add_argument(
-        "-j", "--json-path",
+        "-j",
+        "--json-path",
         dest="json_path",
         required=True,
         help="Path to the configuration JSON file (e.g., flio_uid_data.json).",
-        metavar="FILE"
+        metavar="FILE",
     )
 
     args = parser.parse_args()
@@ -103,10 +114,17 @@ def main():
     step4_folder = os.path.join(output_folder, "step4_compliant_dicom")
     step5_folder = os.path.join(output_folder, "step5_final_structure")
     metadata_folder = os.path.join(output_folder, "metadata")
-    logs_folder = os.path.join(output_folder, "logs") 
+    logs_folder = os.path.join(output_folder, "logs")
 
     # Create the main output folder structure
-    folders_to_recreate = [step2_folder, step3_folder, step4_folder, step5_folder, metadata_folder, logs_folder]
+    folders_to_recreate = [
+        step2_folder,
+        step3_folder,
+        step4_folder,
+        step5_folder,
+        metadata_folder,
+        logs_folder,
+    ]
 
     print("Resetting output directories...")
     for folder in folders_to_recreate:
@@ -115,9 +133,8 @@ def main():
             shutil.rmtree(folder)
         # Create the folder fresh
         os.makedirs(folder)
-    
-    print("Directory structure is ready.")
 
+    print("Directory structure is ready.")
 
     # 3. --- Processing Pipeline ---
 
@@ -141,9 +158,7 @@ def main():
     folders = imaging_utils.list_subfolders(step2_folder)
     for folder in tqdm(folders, desc="Converting (1/2)"):
         try:
-            convert_result = flio_instance.convert1(
-                folder, step3_folder, jsonpath
-            )
+            convert_result = flio_instance.convert1(folder, step3_folder, jsonpath)
             # write_log(step3_log_path, folder, "SUCCESS")
         except Exception as e:
             # If an error occurs, log it and continue to the next folder
@@ -172,7 +187,7 @@ def main():
         try:
             if "flio" in file:
                 full_file_path = imaging_utils.format_file(file, step5_folder)
-            
+
                 if full_file_path:
                     metadata_result = flio_instance.metadata(
                         full_file_path, metadata_folder
@@ -183,7 +198,7 @@ def main():
             # If an error occurs, log it and continue to the next folder
             print(f"\nERROR finalizing {file}: {e}")
             write_log(step4_log_path, file, "FAILURE", str(e))
-    
+
     print("\n--- Pipeline Finished ---")
 
 

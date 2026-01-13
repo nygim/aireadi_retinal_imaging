@@ -1,6 +1,10 @@
 import sys
 
-sys.path.append("/Users/nayoonkim/pipeline_imaging/aireadi_retinal_imaging/year_3")
+# Add year_3 directory to path - OS agnostic
+year_3_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "year_3"
+)
+sys.path.append(year_3_path)
 import argparse
 import os
 
@@ -49,6 +53,7 @@ DicomDictionary.update(new_dict_items)
 new_names_dict = dict([(val[4], tag) for tag, val in new_dict_items.items()])
 keyword_dict.update(new_names_dict)
 
+
 def sort_them_by_sop_class(input_folder, device_protocol, output_folder):
     # Initialize lists to store files based on SOP Class
     sop_class_1 = []
@@ -60,7 +65,7 @@ def sort_them_by_sop_class(input_folder, device_protocol, output_folder):
 
     device_protocol = device_protocol
     device = device_protocol.split("_")[0]
-    
+
     output_path = os.path.join(output_folder, device)
     os.makedirs(output_path, exist_ok=True)
 
@@ -285,7 +290,6 @@ def sort_them_by_sop_class(input_folder, device_protocol, output_folder):
     )
 
 
-
 if __name__ == "__main__":
     # 1. Create an ArgumentParser object
     parser = argparse.ArgumentParser(
@@ -314,7 +318,7 @@ if __name__ == "__main__":
 
     # 4. Call the main function with the parsed arguments
     print("--- Starting DICOM Sorting and Reporting ---")
-    
+
     sop1, sop2, sop3, sop4, sop5, sop6 = sort_them_by_sop_class(
         input_folder=args.input_folder,
         device_protocol=args.device_name,
@@ -322,11 +326,15 @@ if __name__ == "__main__":
     )
 
     print("\n--- Analysis Complete ---")
-    print(f"Found {len(sop1)} files for Ophthalmic Photography 8 Bit Image (SOP Class 1)")
+    print(
+        f"Found {len(sop1)} files for Ophthalmic Photography 8 Bit Image (SOP Class 1)"
+    )
     print(f"Found {len(sop2)} files for Ophthalmic Tomography Image (SOP Class 2)")
     print(f"Found {len(sop3)} files for Ophthalmic Tomography Volume (SOP Class 3)")
     print(f"Found {len(sop4)} files for Segmentation (SOP Class 4)")
     print(f"Found {len(sop5)} files for En Face (SOP Class 5)")
-    print(f"Found {len(sop6)} files for Ophthalmic Photography 16 Bit Image (SOP Class 6)")
+    print(
+        f"Found {len(sop6)} files for Ophthalmic Photography 16 Bit Image (SOP Class 6)"
+    )
     print(f"\nAll reports have been saved in the '{args.output_folder}' directory.")
     print("-----------------------------------------")
