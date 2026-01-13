@@ -108,9 +108,7 @@ def filter_maestro2_triton_files(folder, output):
     else:
 
         protocol = "no_files"
-        outputtt = os.path.join(
-            output, protocol, f"{protocol}_{os.path.basename(folder)}"
-        )
+        outputtt = f"{output}/{protocol}/{protocol}_{folder.split('/')[-1]}"
         shutil.copytree(folder, outputtt, dirs_exist_ok=True)
 
         dic = {

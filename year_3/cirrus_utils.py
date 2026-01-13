@@ -120,7 +120,7 @@ def format_cirrus_file(file, output):
         #     pixel = dataset.pixel_array
         # except Exception:
         #     # Handle case where pixel_array is not available
-        #     full_dir_path = output + "/error_pixel_data/"
+        #     full_dir_path = os.path.join(output, "error_pixel_data")
         #     os.makedirs(full_dir_path, exist_ok=True)
         #     filename = os.path.basename(file)
         #     full_file_path = os.path.join(full_dir_path, filename)

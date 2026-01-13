@@ -183,7 +183,7 @@ def meta_data_save(filename, output_folder):
             "sop_class_uid": dataset.SOPClassUID,
         }
 
-        filename = file.split("/")[-1].replace(".", "_")
+        filename = os.path.basename(file).replace(".", "_")
 
         json_data = {filename: dic}
 
@@ -260,7 +260,7 @@ def meta_data_save(filename, output_folder):
             "sop_class_uid": dataset.SOPClassUID,
         }
 
-        filename = file.split("/")[-1].replace(".", "_")
+        filename = os.path.basename(file).replace(".", "_")
 
         json_data = {filename: dic}
 
@@ -331,7 +331,7 @@ def meta_data_save(filename, output_folder):
             "content_time": dataset.ContentDate + dataset.ContentTime,
             "sop_class_uid": dataset.SOPClassUID,
         }
-        filename = file.split("/")[-1].replace(".", "_")
+        filename = os.path.basename(file).replace(".", "_")
 
         json_data = {filename: dic}
 
@@ -404,7 +404,7 @@ def meta_data_save(filename, output_folder):
             "sop_class_uid": dataset.SOPClassUID,
         }
 
-        filename = file.split("/")[-1].replace(".", "_")
+        filename = os.path.basename(file).replace(".", "_")
 
         json_data = {filename: dic}
 
@@ -509,7 +509,6 @@ def meta_data_save(filename, output_folder):
             elif (
                 dataset["00081115"][i]["0008114A"][0]["00081150"].value
                 == "1.2.840.10008.5.1.4.1.1.66.8"
-             
             ):
                 seg_reference_instance_uid = dataset["00081115"][i]["0008114A"][0][
                     "00081155"
@@ -538,7 +537,7 @@ def meta_data_save(filename, output_folder):
             "seg_reference_instance_uid": seg_reference_instance_uid,
         }
 
-        filename = file.split("/")[-1].replace(".", "_")
+        filename = os.path.basename(file).replace(".", "_")
 
         json_data = {filename: dic}
 

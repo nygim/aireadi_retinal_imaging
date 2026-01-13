@@ -196,11 +196,11 @@ def main():
     ]
 
     for protocol in protocols:
-        output = f"{step3_folder}/{protocol}"
+        output = os.path.join(step3_folder, protocol)
         if not os.path.exists(output):
             os.makedirs(output)
 
-        folders = imaging_utils.list_subfolders(f"{step2_folder}/{protocol}")
+        folders = imaging_utils.list_subfolders(os.path.join(step2_folder, protocol))
 
         for folder in tqdm(folders, desc="Converting"):
 

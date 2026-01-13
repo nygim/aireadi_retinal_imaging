@@ -1,5 +1,3 @@
-
-        
 import json
 import os
 
@@ -159,7 +157,6 @@ def meta_data_save(filename, output_folder):
     if filename is not None:
         dataset = pydicom.dcmread(filename)
 
-
         if dataset.SOPClassUID == "1.2.840.10008.5.1.4.1.1.77.1.5.1":
 
             start_index = filename.find("/retinal_photography")
@@ -211,7 +208,7 @@ def meta_data_save(filename, output_folder):
                 "sop_class_uid": dataset.SOPClassUID,
             }
 
-            filename = file.split("/")[-1].replace(".", "_")
+            filename = os.path.basename(file).replace(".", "_")
 
             json_data = {filename: dic}
 
@@ -292,7 +289,7 @@ def meta_data_save(filename, output_folder):
                 "sop_class_uid": dataset.SOPClassUID,
             }
 
-            filename = file.split("/")[-1].replace(".", "_")
+            filename = os.path.basename(file).replace(".", "_")
 
             json_data = {filename: dic}
 
@@ -371,7 +368,7 @@ def meta_data_save(filename, output_folder):
                 "content_time": dataset.ContentDate + dataset.ContentTime,
                 "sop_class_uid": dataset.SOPClassUID,
             }
-            filename = file.split("/")[-1].replace(".", "_")
+            filename = os.path.basename(file).replace(".", "_")
 
             json_data = {filename: dic}
 
@@ -454,7 +451,7 @@ def meta_data_save(filename, output_folder):
                 "sop_class_uid": dataset.SOPClassUID,
             }
 
-            filename = file.split("/")[-1].replace(".", "_")
+            filename = os.path.basename(file).replace(".", "_")
 
             json_data = {filename: dic}
 
@@ -622,7 +619,7 @@ def meta_data_save(filename, output_folder):
                 "seg_reference_instance_uid": seg_reference_instance_uid,
             }
 
-            filename = file.split("/")[-1].replace(".", "_")
+            filename = os.path.basename(file).replace(".", "_")
 
             json_data = {filename: dic}
 

@@ -163,11 +163,13 @@ def main():
     protocols = ["optomed_mac_or_disk_centered_cfp"]
 
     for protocol in protocols:
-        output = f"{step3_folder}/{protocol}"
+        output = os.path.join(step3_folder, protocol)
         if not os.path.exists(output):
             os.makedirs(output)
 
-        files = imaging_utils.get_filtered_file_names(f"{step2_folder}/{protocol}")
+        files = imaging_utils.get_filtered_file_names(
+            os.path.join(step2_folder, protocol)
+        )
 
         for file in tqdm(files, desc="Converting"):
             try:

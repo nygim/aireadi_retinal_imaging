@@ -65,7 +65,7 @@ def meta_data_save(filename, output_folder):
         "sop_instance_uid": sop_instance_uid,
     }
 
-    filename = file.split("/")[-1].replace(".", "_")
+    filename = os.path.basename(file).replace(".", "_")
 
     json_data = {filename: dic}
 

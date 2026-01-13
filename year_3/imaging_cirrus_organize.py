@@ -258,7 +258,11 @@ def filter_cirrus_files(folder, output):
                                         )
 
                                         # Define the output folder
-                                        outputfolder = f"{output}/{protocol}/{protocol}_{patientid}_{laterality}_{original_folder_basename}"
+                                        outputfolder = os.path.join(
+                                            output,
+                                            protocol,
+                                            f"{protocol}_{patientid}_{laterality}_{original_folder_basename}",
+                                        )
 
                                         # Ensure the output folder exists
                                         os.makedirs(outputfolder, exist_ok=True)
@@ -331,13 +335,15 @@ def filter_cirrus_files(folder, output):
 
             protocol = "invalid_dicom"
 
-            outputfolder = f"{output}/{protocol}"
+            outputfolder = os.path.join(output, protocol)
 
             # Ensure the output folder exists
             os.makedirs(outputfolder, exist_ok=True)
 
             # Construct the source folder path
-            source_folder = f"{outputfolder}/{protocol}_{folder.split('/')[-1]}"
+            source_folder = os.path.join(
+                outputfolder, f"{protocol}_{os.path.basename(folder)}"
+            )
             os.makedirs(source_folder, exist_ok=True)
 
             # Copy the entire folder to the output directory
@@ -354,13 +360,15 @@ def filter_cirrus_files(folder, output):
     else:
 
         protocol = "no_files"
-        outputfolder = f"{output}/{protocol}"
+        outputfolder = os.path.join(output, protocol)
 
         # Ensure the output folder exists
         os.makedirs(outputfolder, exist_ok=True)
 
         # Construct the source folder path
-        source_folder = f"{outputfolder}/{protocol}_{folder.split('/')[-1]}"
+        source_folder = os.path.join(
+            outputfolder, f"{protocol}_{os.path.basename(folder)}"
+        )
         os.makedirs(source_folder, exist_ok=True)
 
         # Copy the entire folder to the output directory
