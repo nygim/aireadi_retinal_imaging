@@ -9,9 +9,10 @@ from tqdm import tqdm
 
 # This line is specific to your local machine's setup.
 # It tells Python where to find your custom modules.
-sys.path.append("/Users/nayoonkim/pipeline_imaging/aireadi_retinal_imaging/year_3")
+sys.path.append("C:\\Users\\sanjay\\Developer\\aireadi_retinal_imaging\\year_3")
 
 import imaging_utils
+
 # Now that the path is added, you can import your custom modules
 import pydicom
 from imaging_optomed_retinal_photography_root import Optomed
@@ -32,52 +33,66 @@ def write_log(log_file_path, input_path, status, error_message=""):
     file_exists = os.path.exists(log_file_path)
 
     # 'a' mode is for appending, newline='' prevents extra blank rows
-    with open(log_file_path, 'a', newline='') as csvfile:
-        fieldnames = ['Timestamp', 'Input', 'Status', 'ErrorMessage']
+    with open(log_file_path, "a", newline="") as csvfile:
+        fieldnames = ["Timestamp", "Input", "Status", "ErrorMessage"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         if not file_exists:
             writer.writeheader()  # Write the header row
 
-        writer.writerow({
-            'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'Input': input_path,
-            'Status': status,
-            'ErrorMessage': error_message
-        })
+        writer.writerow(
+            {
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Input": input_path,
+                "Status": status,
+                "ErrorMessage": error_message,
+            }
+        )
+
 
 def main():
     """
     Main function to parse command-line arguments and run the Optomed processing pipeline.
     """
+    input_folder = "C:\\Users\\sanjay\\Downloads\\sample_data\\optomed\\input"
+    output_folder = "C:\\Users\\sanjay\\Downloads\\sample_data\\optomed\\output"
+
+    ## delete the output_folder if it exists
+    if os.path.exists(output_folder):
+        shutil.rmtree(output_folder)
+        os.makedirs(output_folder)
+    else:
+        os.makedirs(output_folder)
+
     # 1. --- Argument Parsing ---
     # This section sets up how the script receives instructions from the command line.
-    parser = argparse.ArgumentParser(
-        description="A script to process Optomed imaging data from raw files to structured DICOMs."
-    )
+    # parser = argparse.ArgumentParser(
+    #     description="A script to process Optomed imaging data from raw files to structured DICOMs."
+    # )
 
-    parser.add_argument(
-        "-i", "--input-folder",
-        dest="input_folder",
-        required=True,
-        help="Path to the root input folder containing the initial data.",
-        metavar="PATH"
-    )
+    # parser.add_argument(
+    #     "-i",
+    #     "--input-folder",
+    #     dest="input_folder",
+    #     required=True,
+    #     help="Path to the root input folder containing the initial data.",
+    #     metavar="PATH",
+    # )
 
-    parser.add_argument(
-        "-o", "--output-folder",
-        dest="output_folder",
-        required=True,
-        help="Path to the root folder where all processed steps and outputs will be saved.",
-        metavar="PATH"
-    )
+    # parser.add_argument(
+    #     "-o",
+    #     "--output-folder",
+    #     dest="output_folder",
+    #     required=True,
+    #     help="Path to the root folder where all processed steps and outputs will be saved.",
+    #     metavar="PATH",
+    # )
 
-
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
     # Assign the parsed arguments to variables
-    input_folder = args.input_folder
-    output_folder = args.output_folder
+    # input_folder = args.input_folder
+    # output_folder = args.output_folder
 
     print("--- Starting Optomed Processing Pipeline ---")
     print(f"Input Folder: {input_folder}")
@@ -93,10 +108,16 @@ def main():
     step3_folder = os.path.join(output_folder, "step3_converted_dicom")
     step4_folder = os.path.join(output_folder, "step4_final_structure")
     metadata_folder = os.path.join(output_folder, "metadata")
-    logs_folder = os.path.join(output_folder, "logs") 
+    logs_folder = os.path.join(output_folder, "logs")
 
     # Create the main output folder structure
-    folders_to_recreate = [step2_folder, step3_folder, step4_folder, metadata_folder, logs_folder]
+    folders_to_recreate = [
+        step2_folder,
+        step3_folder,
+        step4_folder,
+        metadata_folder,
+        logs_folder,
+    ]
 
     print("Resetting output directories...")
     for folder in folders_to_recreate:
@@ -105,9 +126,8 @@ def main():
             shutil.rmtree(folder)
         # Create the folder fresh
         os.makedirs(folder)
-    
-    print("Directory structure is ready.")
 
+    print("Directory structure is ready.")
 
     # 3. --- Processing Pipeline ---
 
@@ -123,7 +143,6 @@ def main():
 
             try:
                 organize_result = optomed_instance.organize(file, step2_folder)
- 
 
             except Exception as e:
                 # If an error occurs, log it and continue to the next folder
@@ -148,11 +167,9 @@ def main():
                 convert_result = optomed_instance.convert(file, output)
 
             except Exception as e:
-                 # If an error occurs, log it and continue to the next folder
+                # If an error occurs, log it and continue to the next folder
                 print(f"\nERROR converting {file}: {e}")
                 write_log(step3_log_path, file, "FAILURE", str(e))
-                
-
 
     # Step 3: Final Structure and Metadata Extraction
     print("\nStep: Arranging final structure and extracting metadata...")
@@ -170,12 +187,10 @@ def main():
                         full_file_path, metadata_folder
                     )
 
-                    
             except Exception as e:
                 # If an error occurs, log it and continue to the next folder
                 print(f"\nERROR finalizing {file}: {e}")
                 write_log(step4_log_path, file, "FAILURE", str(e))
-
 
     # filtered_list = imaging_utils.get_filtered_file_names(step3_folder)
     # for file in tqdm(filtered_list, desc="Converting (2/2)"):
@@ -196,7 +211,7 @@ def main():
     #     try:
     #         if "optomed" in file:
     #             full_file_path = imaging_utils.format_file(file, step5_folder)
-            
+
     #             if full_file_path:
     #                 metadata_result = optomed_instance.metadata(
     #                     full_file_path, metadata_folder
@@ -207,8 +222,9 @@ def main():
     #         # If an error occurs, log it and continue to the next folder
     #         print(f"\nERROR finalizing {file}: {e}")
     #         write_log(step4_log_path, file, "FAILURE", str(e))
-    
+
     # print("\n--- Pipeline Finished ---")
+
 
 if __name__ == "__main__":
     # This block ensures that the main() function is called only when
