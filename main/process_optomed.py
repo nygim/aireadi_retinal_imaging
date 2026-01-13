@@ -97,7 +97,7 @@ def main():
 
     # args = parser.parse_args()
 
-    # Assign the parsed arguments to variables
+    # # Assign the parsed arguments to variables
     # input_folder = args.input_folder
     # output_folder = args.output_folder
 

@@ -58,45 +58,51 @@ def main():
     """
     Main function to parse command-line arguments and run the FLIO processing pipeline.
     """
+    # Example paths - replace with your actual paths or use command-line arguments
+    home_folder = os.path.expanduser("~")
+    download_data_folder = os.path.join(home_folder, "Downloads", "sample_data")
+    input_folder = os.path.join(download_data_folder, "flio", "input")
+    output_folder = os.path.join(download_data_folder, "flio", "output")
+    jsonpath = os.path.join(year_3_path, "flio_uid_data.json")
     # 1. --- Argument Parsing ---
     # This section sets up how the script receives instructions from the command line.
-    parser = argparse.ArgumentParser(
-        description="A script to process FLIO imaging data from raw files to structured DICOMs."
-    )
+    # parser = argparse.ArgumentParser(
+    #     description="A script to process FLIO imaging data from raw files to structured DICOMs."
+    # )
 
-    parser.add_argument(
-        "-i",
-        "--input-folder",
-        dest="input_folder",
-        required=True,
-        help="Path to the root input folder containing the initial data.",
-        metavar="PATH",
-    )
+    # parser.add_argument(
+    #     "-i",
+    #     "--input-folder",
+    #     dest="input_folder",
+    #     required=True,
+    #     help="Path to the root input folder containing the initial data.",
+    #     metavar="PATH",
+    # )
 
-    parser.add_argument(
-        "-o",
-        "--output-folder",
-        dest="output_folder",
-        required=True,
-        help="Path to the root folder where all processed steps and outputs will be saved.",
-        metavar="PATH",
-    )
+    # parser.add_argument(
+    #     "-o",
+    #     "--output-folder",
+    #     dest="output_folder",
+    #     required=True,
+    #     help="Path to the root folder where all processed steps and outputs will be saved.",
+    #     metavar="PATH",
+    # )
 
-    parser.add_argument(
-        "-j",
-        "--json-path",
-        dest="json_path",
-        required=True,
-        help="Path to the configuration JSON file (e.g., flio_uid_data.json).",
-        metavar="FILE",
-    )
+    # parser.add_argument(
+    #     "-j",
+    #     "--json-path",
+    #     dest="json_path",
+    #     required=True,
+    #     help="Path to the configuration JSON file (e.g., flio_uid_data.json).",
+    #     metavar="FILE",
+    # )
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    # Assign the parsed arguments to variables
-    input_folder = args.input_folder
-    output_folder = args.output_folder
-    jsonpath = args.json_path
+    # # Assign the parsed arguments to variables
+    # input_folder = args.input_folder
+    # output_folder = args.output_folder
+    # jsonpath = args.json_path
 
     print("--- Starting FLIO Processing Pipeline ---")
     print(f"Input Folder: {input_folder}")

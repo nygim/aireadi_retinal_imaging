@@ -95,35 +95,40 @@ def main():
     """
     Main function to parse command-line arguments and run the Cirrus processing pipeline.
     """
+    #
+    home_folder = os.path.expanduser("~")
+    download_data_folder = os.path.join(home_folder, "Downloads", "sample_data")
+    input_folder = os.path.join(download_data_folder, "cirrus", "input")
+    output_folder = os.path.join(download_data_folder, "cirrus", "output")
     # 1. --- Argument Parsing ---
     # This section sets up how the script receives instructions from the command line.
-    parser = argparse.ArgumentParser(
-        description="A script to process Cirrus imaging data from raw files to structured DICOMs."
-    )
+    # parser = argparse.ArgumentParser(
+    #     description="A script to process Cirrus imaging data from raw files to structured DICOMs."
+    # )
 
-    parser.add_argument(
-        "-i",
-        "--input-folder",
-        dest="input_folder",
-        required=True,
-        help="Path to the root input folder containing the initial data.",
-        metavar="PATH",
-    )
+    # parser.add_argument(
+    #     "-i",
+    #     "--input-folder",
+    #     dest="input_folder",
+    #     required=True,
+    #     help="Path to the root input folder containing the initial data.",
+    #     metavar="PATH",
+    # )
 
-    parser.add_argument(
-        "-o",
-        "--output-folder",
-        dest="output_folder",
-        required=True,
-        help="Path to the root folder where all processed steps and outputs will be saved.",
-        metavar="PATH",
-    )
+    # parser.add_argument(
+    #     "-o",
+    #     "--output-folder",
+    #     dest="output_folder",
+    #     required=True,
+    #     help="Path to the root folder where all processed steps and outputs will be saved.",
+    #     metavar="PATH",
+    # )
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    # Assign the parsed arguments to variables
-    input_folder = args.input_folder
-    output_folder = args.output_folder
+    # # Assign the parsed arguments to variables
+    # input_folder = args.input_folder
+    # output_folder = args.output_folder
 
     print("--- Starting Cirrus Processing Pipeline ---")
     print(f"Input Folder: {input_folder}")

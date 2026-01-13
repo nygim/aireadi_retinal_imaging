@@ -93,40 +93,71 @@ def main():
     """
     Main function to parse command-line arguments and run the Topcon processing pipeline.
     """
+    # Example paths - replace with your actual paths or use command-line arguments
+    home_folder = os.path.expanduser("~")
+    download_data_folder = os.path.join(home_folder, "Downloads", "sample_data")
+    input_triton_folder = os.path.join(download_data_folder, "triton", "input")
+    output_triton_folder = os.path.join(download_data_folder, "triton", "output")
+    input_maestro2_folder = os.path.join(download_data_folder, "maestro2", "input")
+    output_maestro2_folder = os.path.join(download_data_folder, "maestro2", "output")
+
     # 1. --- Argument Parsing ---
     # This section sets up how the script receives instructions from the command line.
     parser = argparse.ArgumentParser(
         description="A script to process Topcon imaging data from raw files to structured DICOMs."
     )
 
-    parser.add_argument(
-        "-i",
-        "--input-folder",
-        dest="input_folder",
-        required=True,
-        help="Path to the root input folder containing the initial data.",
-        metavar="PATH",
-    )
+    # parser.add_argument(
+    #     "-i",
+    #     "--input-folder",
+    #     dest="input_folder",
+    #     required=True,
+    #     help="Path to the root input folder containing the initial data.",
+    #     metavar="PATH",
+    # )
+
+    # parser.add_argument(
+    #     "-o",
+    #     "--output-folder",
+    #     dest="output_folder",
+    #     required=True,
+    #     help="Path to the root folder where all processed steps and outputs will be saved.",
+    #     metavar="PATH",
+    # )
 
     parser.add_argument(
-        "-o",
-        "--output-folder",
-        dest="output_folder",
+        "-m",
+        "--mode",
+        dest="mode",
         required=True,
-        help="Path to the root folder where all processed steps and outputs will be saved.",
-        metavar="PATH",
+        help="Mode to run the pipeline. Valid options are 'maestro2' or 'triton'. Don't USE THIS. JUST FOR TESTING.",
+        metavar="MODE",
     )
 
     args = parser.parse_args()
 
+    if args.mode not in ["triton", "maestro2"]:
+        raise ValueError("Invalid mode. Valid options are 'triton' or 'maestro2'.")
+
     # Assign the parsed arguments to variables
-    input_folder = args.input_folder
-    output_folder = args.output_folder
+    input_folder = (
+        input_triton_folder if args.mode == "triton" else input_maestro2_folder
+    )
+    output_folder = (
+        output_triton_folder if args.mode == "triton" else output_maestro2_folder
+    )
 
     print("--- Starting Topcon Processing Pipeline ---")
     print(f"Input Folder: {input_folder}")
     print(f"Output Folder: {output_folder}")
     print("-----------------------------------------")
+
+    # Delete the output folder if it exists
+    if os.path.exists(output_folder):
+        shutil.rmtree(output_folder)
+        os.makedirs(output_folder)
+    else:
+        os.makedirs(output_folder)
 
     # 2. --- Setup ---
     # Initialize your custom class
@@ -205,6 +236,9 @@ def main():
 
         folders = imaging_utils.list_subfolders(os.path.join(step2_folder, protocol))
 
+        if len(folders) == 0:
+            continue
+
         for folder in tqdm(folders, desc="Converting"):
 
             try:
@@ -214,6 +248,7 @@ def main():
                 # If an error occurs, log it and continue to the next folder
                 print(f"\nERROR converting {folder}: {e}")
                 write_log(step3_log_path, folder, "FAILURE", str(e))
+                print(e)
 
     # Step 3: Final Structure and Metadata Extraction
     print("\nStep: Arranging final structure and extracting metadata...")
@@ -222,6 +257,9 @@ def main():
 
     for folder in folders:
         filelist = imaging_utils.get_filtered_file_names(folder)
+
+        if len(filelist) == 0:
+            continue
 
         for file in tqdm(filelist):
             try:
