@@ -8,6 +8,13 @@ import os
 from typing import Dict, Set, List, Tuple
 import pydicom
 import csv
+import sys
+
+# Add year_3 directory to path
+repo_path = os.path.dirname(os.path.abspath(__file__))
+year_3_path = os.path.join(repo_path, "year_3")
+sys.path.append(year_3_path)
+import organize_utils
 
 
 def normalize_path(path: str) -> str:
@@ -338,11 +345,15 @@ def compare_folders(folder1: str, folder2: str, verbose: bool = False) -> None:
 
     print(f"\nComparing {len(dcm_files)} DICOM files...")
     dcm_differences = []
+
     for rel_path in sorted(dcm_files):
         file1 = files1[rel_path]
         file2 = files2[rel_path]
-        are_equal, diffs = compare_dicom_files(file1, file2)
-        if not are_equal:
+
+        # Use organize_utils.diff_dicom_structures (which uses _diff_ds) to compare structures
+        diffs = organize_utils.diff_dicom_structures(file1, file2)
+
+        if diffs:
             dcm_differences.append((rel_path, diffs))
             if verbose:
                 print(f"\n  Differences in {rel_path}:")
