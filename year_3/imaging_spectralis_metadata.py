@@ -58,7 +58,7 @@ def meta_data_save(filename, output_folder):
 
     if dataset.SOPClassUID == "1.2.840.10008.5.1.4.1.1.77.1.5.1":
 
-        start_index = filename.find("/retinal_photography")
+        start_index = filename.find(f"{os.path.sep}retinal_photography")
         file = filename[start_index:]
 
         # Extracting metadata
@@ -122,7 +122,7 @@ def meta_data_save(filename, output_folder):
 
     if dataset.SOPClassUID == "1.2.840.10008.5.1.4.1.1.77.1.5.4":
 
-        start_index = filename.find("/retinal_oct")
+        start_index = filename.find(f"{os.path.sep}retinal_oct")
         file = filename[start_index:]
 
         # Extracting metadata
