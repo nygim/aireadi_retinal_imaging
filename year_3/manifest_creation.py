@@ -660,10 +660,6 @@ def octa_manifest(imaging_folder):
     cirrus_pattern = r".*cirrus.*enface.*1_dcm\.json$"
     topcon_pattern = r".*(maestro2|triton).*segmentation.*7_3_dcm\.json$"
 
-    print("cirrus_pattern", cirrus_pattern)
-    print("topcon_pattern", topcon_pattern)
-    print("files", len(files), files)
-
     # Filter the list of files
     cirrus_filtered_files = [
         f for f in files if re.search(cirrus_pattern, f, re.IGNORECASE)
@@ -671,9 +667,6 @@ def octa_manifest(imaging_folder):
     topcon_filtered_files = [
         f for f in files if re.search(topcon_pattern, f, re.IGNORECASE)
     ]
-
-    print("cirrus_filtered_files", len(cirrus_filtered_files), cirrus_filtered_files)
-    print("topcon_filtered_files", len(topcon_filtered_files), topcon_filtered_files)
 
     # Merge the two filtered lists
     merged_files = cirrus_filtered_files + topcon_filtered_files

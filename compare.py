@@ -5,10 +5,67 @@ Compares contents for .dcm (DICOM) and .tsv files, ignores .DS_Store files.
 """
 
 import os
-import argparse
 from typing import Dict, Set, List, Tuple
 import pydicom
-import pandas as pd
+import csv
+
+
+def normalize_path(path: str) -> str:
+    """
+    Normalize a file path for comparison.
+    - Normalizes path separators to forward slashes
+    - Converts to lowercase (for case-insensitive comparison)
+    - Normalizes relative path components
+
+    Args:
+        path: File path to normalize
+
+    Returns:
+        Normalized path string
+    """
+    # Normalize path separators and resolve relative components
+    normalized = os.path.normpath(path).replace(os.sep, "/")
+    # Convert to lowercase for case-insensitive comparison
+    normalized = normalized.lower()
+    return normalized
+
+
+def looks_like_filepath(value: str) -> bool:
+    """
+    Check if a string value looks like a file path.
+
+    Args:
+        value: String value to check
+
+    Returns:
+        True if the value appears to be a file path
+    """
+    if not value or not isinstance(value, str):
+        return False
+    # Check for path separators or common path patterns
+    return (
+        "/" in value
+        or "\\" in value
+        or value.startswith("./")
+        or value.startswith("../")
+    )
+
+
+def normalize_tsv_value(value: str) -> str:
+    """
+    Normalize a TSV cell value, handling file paths if present.
+
+    Args:
+        value: Cell value from TSV
+
+    Returns:
+        Normalized value (file paths are normalized, other values unchanged)
+    """
+    if not value:
+        return value
+    if looks_like_filepath(value):
+        return normalize_path(value)
+    return value
 
 
 def get_all_files(root_dir: str, ignore_patterns: Set[str] = None) -> Dict[str, str]:
@@ -38,7 +95,9 @@ def get_all_files(root_dir: str, ignore_patterns: Set[str] = None) -> Dict[str, 
 
             abs_path = os.path.join(root, filename)
             rel_path = os.path.relpath(abs_path, root_dir)
-            files[rel_path] = abs_path
+            # Normalize the relative path for comparison
+            normalized_path = normalize_path(rel_path)
+            files[normalized_path] = abs_path
 
     return files
 
@@ -107,7 +166,7 @@ def compare_dicom_files(file1: str, file2: str) -> Tuple[bool, List[str]]:
 
 def compare_tsv_files(file1: str, file2: str) -> Tuple[bool, List[str]]:
     """
-    Compare two TSV files by comparing their data.
+    Compare two TSV files by reading them into dictionaries and comparing.
 
     Args:
         file1: Path to first TSV file
@@ -119,39 +178,92 @@ def compare_tsv_files(file1: str, file2: str) -> Tuple[bool, List[str]]:
     differences = []
 
     try:
-        # Read TSV files
-        df1 = pd.read_csv(file1, sep="\t", dtype=str, keep_default_na=False)
-        df2 = pd.read_csv(file2, sep="\t", dtype=str, keep_default_na=False)
+        # Read TSV files into dictionaries
+        dict1 = []
+        dict2 = []
 
-        # Compare shapes
-        if df1.shape != df2.shape:
-            differences.append(f"Different shapes: {df1.shape} vs {df2.shape}")
+        with open(file1, "r", encoding="utf-8") as f1:
+            reader1 = csv.DictReader(f1, delimiter="\t")
+            dict1 = [row for row in reader1]
 
-        # Compare columns
-        if list(df1.columns) != list(df2.columns):
+        with open(file2, "r", encoding="utf-8") as f2:
+            reader2 = csv.DictReader(f2, delimiter="\t")
+            dict2 = [row for row in reader2]
+
+        # Normalize file paths in the data
+        for row in dict1:
+            for key in row:
+                row[key] = normalize_tsv_value(row[key])
+
+        for row in dict2:
+            for key in row:
+                row[key] = normalize_tsv_value(row[key])
+
+        # Compare number of rows
+        if len(dict1) != len(dict2):
             differences.append(
-                f"Different columns: {list(df1.columns)} vs {list(df2.columns)}"
+                f"Different number of rows: {len(dict1)} vs {len(dict2)}"
             )
 
-        # Compare data (only if shapes and columns match)
-        if df1.shape == df2.shape and list(df1.columns) == list(df2.columns):
-            # Find rows that differ
-            diff_mask = ~df1.equals(df2)
-            if diff_mask.any().any():
-                # Find specific differences
-                for col in df1.columns:
-                    if not df1[col].equals(df2[col]):
-                        diff_rows = df1[col] != df2[col]
-                        num_diffs = diff_rows.sum()
-                        differences.append(f"Column '{col}': {num_diffs} rows differ")
-                        # Show first few differences
-                        diff_indices = df1[diff_rows].index[:5].tolist()
-                        if diff_indices:
-                            differences.append(
-                                f"  First differences at rows: {diff_indices}"
-                            )
-        else:
-            differences.append("Cannot compare data due to shape/column mismatch")
+        # Compare columns (keys from first row)
+        if dict1 and dict2:
+            keys1 = set(dict1[0].keys())
+            keys2 = set(dict2[0].keys())
+
+            if keys1 != keys2:
+                only_in_1 = keys1 - keys2
+                only_in_2 = keys2 - keys1
+                if only_in_1:
+                    differences.append(f"Columns only in file1: {sorted(only_in_1)}")
+                if only_in_2:
+                    differences.append(f"Columns only in file2: {sorted(only_in_2)}")
+
+            # Sort rows by all columns to ensure consistent ordering for comparison
+            # This handles cases where rows are in different orders
+            common_keys = sorted(keys1 & keys2)
+
+            def sort_key(row):
+                """Create a sort key from all column values in the row."""
+                return tuple(row.get(key, "") for key in common_keys)
+
+            # Sort both lists using the same key function
+            dict1_sorted = sorted(dict1, key=sort_key)
+            dict2_sorted = sorted(dict2, key=sort_key)
+
+            # Compare data row by row (now both are sorted)
+            min_rows = min(len(dict1_sorted), len(dict2_sorted))
+
+            for i in range(min_rows):
+                row1 = dict1_sorted[i]
+                row2 = dict2_sorted[i]
+
+                for key in common_keys:
+                    val1 = row1.get(key, "")
+                    val2 = row2.get(key, "")
+                    if val1 != val2:
+                        differences.append(
+                            f"Row {i + 1} (after sorting), column '{key}': '{val1}' != '{val2}'"
+                        )
+                        # Limit output to first 10 differences
+                        if len(differences) >= 10:
+                            return False, differences
+
+            # Check for extra rows
+            if len(dict1_sorted) > len(dict2_sorted):
+                differences.append(
+                    f"File1 has {len(dict1_sorted) - len(dict2_sorted)} extra rows"
+                )
+            elif len(dict2_sorted) > len(dict1_sorted):
+                differences.append(
+                    f"File2 has {len(dict2_sorted) - len(dict1_sorted)} extra rows"
+                )
+        elif dict1 and not dict2:
+            differences.append("File1 has data but file2 is empty")
+        elif dict2 and not dict1:
+            differences.append("File2 has data but file1 is empty")
+        elif not dict1 and not dict2:
+            # Both empty - they're equal
+            pass
 
         return len(differences) == 0, differences
 
@@ -279,7 +391,7 @@ def compare_folders(folder1: str, folder2: str, verbose: bool = False) -> None:
     if total_differences == 0:
         print("✓ Folders are identical!")
     else:
-        print(f"✗ Found {total_differences} differences:")
+        print(f"x Found {total_differences} differences:")
         print(f"  - {len(only_in_folder1)} files only in folder 1")
         print(f"  - {len(only_in_folder2)} files only in folder 2")
         print(f"  - {len(dcm_differences)} DICOM files with content differences")
@@ -287,12 +399,27 @@ def compare_folders(folder1: str, folder2: str, verbose: bool = False) -> None:
 
 
 def main():
-    folder1 = (
-        "C:\\Users\\sanjay\\Downloads\\sample_data\\eidon\\final\\retinal_photography"
-    )
-    folder2 = "C:\\Users\\sanjay\\Downloads\\retinal_photography"
+    home_folder = os.path.expanduser("~")
+    base_folder1 = os.path.join(home_folder, "Downloads", "sample_data")
+    base_folder2 = os.path.join(home_folder, "Downloads", "2024release", "sample_data")
 
-    compare_folders(folder1, folder2, verbose=True)
+    folders = [
+        # ["spectralis", "final"],
+        # ["cirrus", "final"],
+        # ["flio", "final"],
+        # ["optomed", "final"],
+        # ["eidon", "final"],
+        # ["maestro2", "final"],
+        ["triton", "final"],
+    ]
+
+    for folder in folders:
+        folder1 = os.path.join(base_folder1, *folder)
+        folder2 = os.path.join(base_folder2, *folder)
+        print("folder1", folder1)
+        print("folder2", folder2)
+        compare_folders(folder1, folder2, verbose=True)
+        print("=" * 80)
 
 
 if __name__ == "__main__":
